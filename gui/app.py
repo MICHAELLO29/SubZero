@@ -42,6 +42,7 @@ class SubtitleApp:
         
         self.input_path = ctk.StringVar()
         self.output_path = ctk.StringVar()
+        self.language_var = ctk.StringVar(value="Auto-Detect")
         self.model_size = ctk.StringVar(value="large-v3")
         self.task_type = ctk.StringVar(value="Translate to English")
         
@@ -73,12 +74,19 @@ class SubtitleApp:
         self.btn_browse_out.grid(row=1, column=2, padx=(0, 20), pady=(0, 15))
         
         # Options row
-        ctk.CTkLabel(self.settings_frame, text="AI Engine:").grid(row=2, column=0, padx=20, pady=(0, 20), sticky="w")
-        self.model_combo = ctk.CTkOptionMenu(self.settings_frame, variable=self.model_size, values=["tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo"])
-        self.model_combo.grid(row=2, column=1, padx=(0, 10), pady=(0, 20), sticky="w")
+        ctk.CTkLabel(self.settings_frame, text="Settings:").grid(row=2, column=0, padx=20, pady=(0, 20), sticky="w")
         
-        self.task_combo = ctk.CTkOptionMenu(self.settings_frame, variable=self.task_type, values=["Translate to English", "Transcribe (keep Japanese)"])
-        self.task_combo.grid(row=2, column=1, padx=(160, 10), pady=(0, 20), sticky="w")
+        options_subframe = ctk.CTkFrame(self.settings_frame, fg_color="transparent")
+        options_subframe.grid(row=2, column=1, columnspan=2, padx=(0, 20), pady=(0, 20), sticky="w")
+        
+        self.lang_combo = ctk.CTkOptionMenu(options_subframe, variable=self.language_var, values=["Auto-Detect", "Japanese", "Korean", "Chinese", "Spanish", "French", "English", "German", "Russian"], width=130)
+        self.lang_combo.pack(side="left", padx=(0, 10))
+
+        self.model_combo = ctk.CTkOptionMenu(options_subframe, variable=self.model_size, values=["tiny", "base", "small", "medium", "large-v2", "large-v3", "large-v3-turbo"], width=110)
+        self.model_combo.pack(side="left", padx=(0, 10))
+        
+        self.task_combo = ctk.CTkOptionMenu(options_subframe, variable=self.task_type, values=["Translate to English", "Transcribe (keep original)"], width=180)
+        self.task_combo.pack(side="left")
         
         # Log Textbox
         self.log_textbox = ctk.CTkTextbox(self.root, corner_radius=10, state="disabled")
@@ -171,21 +179,34 @@ class SubtitleApp:
                 
             task_str = "translate" if "Translate" in self.task_type.get() else "transcribe"
             
+            lang_map = {
+                "Auto-Detect": None,
+                "Japanese": "ja",
+                "Korean": "ko",
+                "Chinese": "zh",
+                "Spanish": "es",
+                "French": "fr",
+                "English": "en",
+                "German": "de",
+                "Russian": "ru"
+            }
+            lang_code = lang_map.get(self.language_var.get(), None)
+            
             # 1. Resolve path (audio extraction if needed)
             audio_path_str, is_temp = resolve_audio_path(input_file)
             
             if is_temp:
                 temp_wav_path = audio_path_str
                 self.log("Video file detected — extracting audio first...")
-                self.log(f"Transcribing Japanese audio with Whisper (model: {self.model_size.get()})...")
+                self.log(f"Transcribing audio with Whisper (language: {self.language_var.get()}, model: {self.model_size.get()})...")
             else:
                 self.log("Audio file detected — processing directly...")
-                self.log(f"Transcribing Japanese audio with Whisper (model: {self.model_size.get()})...")
+                self.log(f"Transcribing audio with Whisper (language: {self.language_var.get()}, model: {self.model_size.get()})...")
             
             self.log("This may take a while for long files. Please wait...\n")
 
             # 2. Transcribe using Whisper
-            segments = transcribe(audio_path_str, model_size=self.model_size.get(), task=task_str)
+            segments = transcribe(audio_path_str, model_size=self.model_size.get(), task=task_str, language=lang_code)
             
             # 3. Write SRT file
             self.log("\nWriting subtitle file...")

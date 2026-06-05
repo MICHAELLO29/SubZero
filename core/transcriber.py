@@ -1,7 +1,7 @@
 from faster_whisper import WhisperModel
 import warnings
 
-def transcribe(audio_path: str, model_size: str = "large-v3", task: str = "translate") -> list:
+def transcribe(audio_path: str, model_size: str = "large-v3", task: str = "translate", language: str = None) -> list:
     """
     Transcribes/translates audio using faster-whisper.
     Returns list of segment dicts.
@@ -18,10 +18,11 @@ def transcribe(audio_path: str, model_size: str = "large-v3", task: str = "trans
         # VAD filter is the magic sauce that deletes silence, moaning, and breathing to prevent hallucinations
         segments_generator, info = model.transcribe(
             audio_path, 
-            language="ja", 
+            language=language, 
             task=task,
             vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=500)
+            vad_parameters=dict(min_silence_duration_ms=500),
+            condition_on_previous_text=False
         )
         
         # Convert generator to list of dicts for our srt_writer
