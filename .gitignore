@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+.env/
+ENV/
+
+# Media Files (Don't upload users' giant movies/audio to GitHub)
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.mp3
+*.wav
+*.flac
+*.m4a
+
+# Subtitle outputs
+*.srt
+
+# IDEs / OS specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
