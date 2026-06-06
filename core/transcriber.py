@@ -21,8 +21,11 @@ def transcribe(audio_path: str, model_size: str = "large-v3", task: str = "trans
             language=language, 
             task=task,
             vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=500),
-            condition_on_previous_text=False
+            vad_parameters=dict(min_silence_duration_ms=2000, speech_pad_ms=600),
+            condition_on_previous_text=False,
+            word_timestamps=False,
+            beam_size=7,
+            initial_prompt=None
         )
         
         # Convert generator to list of dicts for our srt_writer

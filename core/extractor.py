@@ -13,7 +13,7 @@ def extract_audio(video_path: str) -> str:
         (
             ffmpeg
             .input(video_path)
-            .output(str(temp_wav_path), ac=1, ar='16k', vn=None, format='wav', loglevel='error')
+            .output(str(temp_wav_path), ac=1, ar='16k', vn=None, format='wav', af='loudnorm', loglevel='error')
             .overwrite_output()
             .run(capture_stdout=True, capture_stderr=True)
         )
